@@ -12,6 +12,7 @@ RUN npm install
 # Bundle app source
 COPY . /usr/src/app
 
+# Prepare container image
 FROM base as final
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app .
