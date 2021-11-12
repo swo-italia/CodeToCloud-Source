@@ -4,3 +4,5 @@ This repository contains the source code for the CodeToCloud workshop. Please fo
 
 Issues and pull requests have been disabled for this repo. These can be added to the [parent repository](https://github.com/XpiritBV/CodeToCloud-Workshop) and will be reflected in this repo! 
 Fixes AB#5
+
+Linked AB#9
