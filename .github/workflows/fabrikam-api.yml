@@ -43,27 +43,20 @@ jobs:
 #          username: ${{ github.repository_owner }}
 #          password: ${{ secrets.CTC_PAT }}
 
-      - name: Log into registry ${{ env.REGISTRY }}
+      - name: Log into registry GitHub Container Registry
         run: echo ${{ secrets.CTC_PAT }} | docker login -u ${{ github.repository_owner }} --password-stdin ghcr.io
 
       - name: Push image to GitHub Container Registry
         working-directory: ./content-api
         run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
           
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
+          VERSION=latest
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
-          
