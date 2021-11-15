@@ -32,8 +32,15 @@ jobs:
         working-directory: ./content-api
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
-      - name: Log into registry ${{ env.REGISTRY }}
-        run: echo "${{ secrets.CTC_PAT }}" | docker login https://ghcr.io -u swo-italia --password-stdin
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: swo-italia
+          password: ${{ secrets.CTC_PAT }}
+
+#      - name: Log into registry ${{ env.REGISTRY }}
+#        run: echo "${{ secrets.CTC_PAT }}" | docker login https://ghcr.io -u swo-italia --password-stdin
 
       - name: Push image to GitHub Container Registry
         working-directory: ./content-api
