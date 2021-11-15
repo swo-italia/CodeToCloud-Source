@@ -7,9 +7,14 @@ name: Fabrikam API
 
 on:
   push:
-    branches: [ main ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
+    # Publish `main` as Docker `latest` image.
+    branches:
+      - main
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
   pull_request:
 
 env:
@@ -17,7 +22,6 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: fabrikam-api
-
 
 jobs:
   build:
@@ -36,11 +40,12 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: swo-italia
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.CTC_PAT }}
 
 #      - name: Log into registry ${{ env.REGISTRY }}
-#        run: echo "${{ secrets.CTC_PAT }}" | docker login https://ghcr.io -u swo-italia --password-stdin
+#        run: echo ${{ secrets.CTC_PAT }} | docker login -u ${{ github.repository_owner }} --password-stdin ghcr.io
+####echo "${{ secrets.CTC_PAT }}" | docker login https://ghcr.io -u swo-italia --password-stdin
 
       - name: Push image to GitHub Container Registry
         working-directory: ./content-api
