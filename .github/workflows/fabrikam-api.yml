@@ -33,7 +33,7 @@ jobs:
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into registry ${{ env.REGISTRY }}
-        run: echo "${{ secrets.CTC_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.CTC_PAT }}" | docker login https://ghcr.io -u swo-italia --password-stdin
 
       - name: Push image to GitHub Container Registry
         working-directory: ./content-api
