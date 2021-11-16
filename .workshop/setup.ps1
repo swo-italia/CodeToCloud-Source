@@ -149,6 +149,8 @@ function Apply-Settings
     $global:location2 = "northeurope"
     $global:appInsights = "fabmedicalai-" + $current.Student
     $global:CR_PAT = $current.GithubToken
+    $global:CTC_PAT = $current.CTC_PAT
+    $global:TF_VAR_ctc_pat = $current.CTC_PAT
     
     $env:studentsuffix = $current.Student
     $env:resourcegroupName = "fabmedical-rg-" + $current.Student
@@ -159,6 +161,8 @@ function Apply-Settings
     $env:location2 = "northeurope"
     $env:appInsights = "fabmedicalai-" + $current.Student
     $env:CR_PAT = $current.GithubToken
+    $env:CTC_PAT = $current.CTC_PAT
+    $env:TF_VAR_ctc_pat = $current.CTC_PAT
   }
 }
 
