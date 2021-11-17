@@ -37,11 +37,12 @@ jobs:
       - name: Login on Azure
         uses: azure/login@v1.1
         with:
-          creds: ${{ secrets.AZ_CRED }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Update WebApp with new Container version
         ## TO DO: Create multiple environments using variables.TF
         shell: pwsh
+        env:
+           CR_PAT: ${{ secrets.CTC_PAT }}
         run:
-          cd .\update_docker_compose
-          /workspaces/terraform validate -env_prefix mzl
+           az account list
