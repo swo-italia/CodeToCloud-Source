@@ -87,11 +87,9 @@ resource "azurerm_cosmosdb_account" "db" {
   }
 
   provisioner "local-exec" {
-    command     = "docker run -ti -e MONGODB_CONNECTION=\"$MONGO_PKEY\" ghcr.io/swo-italia/fabrikam-init"
+    interpreter = ["pwsh", "-Command"]
+    command     = "docker run -e MONGODB_CONNECTION=\"mongodb://fabmedical-cdb-mzl:${azurerm_cosmosdb_account.db.primary_key}@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@\" ghcr.io/swo-italia/fabrikam-init"
     working_dir = "/workspaces/CodeToCloud-Source/content-init"
-    environment = {
-      MONGO_PKEY = "mongodb://fabmedical-cdb-mzl:${azurerm_cosmosdb_account.db.primary_key}@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@"
-    }
   }
 }
 
