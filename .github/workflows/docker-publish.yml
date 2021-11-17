@@ -45,4 +45,5 @@ jobs:
         env:
            CR_PAT: ${{ secrets.CTC_PAT }}
         run:
-           az account list
+           Set-Location /workspaces/CodeToCloud-Source/infrastructure
+           ./deploy-infrastrcuture_mzl.ps1 -studentprefix mzl
