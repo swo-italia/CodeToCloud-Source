@@ -12,45 +12,49 @@ terraform {
 
 provider "azurerm" {
   features {}
+
+  subscription_id = "63cbb0dd-59fe-4cb9-a739-77e69b1ee643"
+  client_id       = "cec052e4-aa48-4491-9f6e-06e9c2f9403b"
+  client_secret   = var.client_secret
+  tenant_id       = "5327bca4-17c2-49c8-98b7-44cfd67a2ee5"
 }
 
 resource "azurerm_resource_group" "rg" {
-  #id       = "/subscriptions/63cbb0dd-59fe-4cb9-a739-77e69b1ee643/resourceGroups/marzulo_eu"
   name     = var.resourcegroupName
   location = var.location_name
 }
 
 # Create a virtual network
-resource "azurerm_virtual_network" "vnet" {
-  name                = var.networkName
-  address_space       = ["10.10.0.0/16"]
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-}
+#resource "azurerm_virtual_network" "vnet" {
+#  name                = var.networkName
+#  address_space       = ["10.10.0.0/16"]
+#  location            = azurerm_resource_group.rg.location
+#  resource_group_name = azurerm_resource_group.rg.name
+#}
 
 # Create a storage account
-resource "azurerm_storage_account" "sa" {
-  name                     = var.storageAcctName
-  resource_group_name      = azurerm_resource_group.rg.name
-  location                 = azurerm_resource_group.rg.location
-  account_kind             = "StorageV2"
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-}
+#resource "azurerm_storage_account" "sa" {
+#  name                     = var.storageAcctName
+#  resource_group_name      = azurerm_resource_group.rg.name
+#  location                 = azurerm_resource_group.rg.location
+#  account_kind             = "StorageV2"
+#  account_tier             = "Standard"
+#  account_replication_type = "LRS"
+#}
 
 # Create a ACR
-resource "azurerm_container_registry" "example" {
-  name                = var.containerRegistryName
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  sku                 = "Basic"
-}
+#resource "azurerm_container_registry" "example" {
+#  name                = var.containerRegistryName
+#  resource_group_name = azurerm_resource_group.rg.name
+#  location            = azurerm_resource_group.rg.location
+#  sku                 = "Basic"
+#}
 
 # Create a CosmosDB
-resource "random_integer" "ri" {
-  min = 10000
-  max = 99999
-}
+#resource "random_integer" "ri" {
+#  min = 10000
+#  max = 99999
+#}
 
 resource "azurerm_cosmosdb_account" "db" {
   name                 = var.cosmosDBName

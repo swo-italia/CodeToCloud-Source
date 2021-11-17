@@ -1,5 +1,11 @@
-$studentprefix = "mzl"
-$resourcegroupName = "fabmedical-rg" + $studentprefix
+param
+(
+    [string] $studentprefix = "mzl"
+)
+
+## DECLARE VARIABLES
+#$studentprefix = "mzl"
+$resourcegroupName = "fabmedical-rg-" + $studentprefix
 $cosmosDBName = "fabmedical-cdb-" + $studentprefix
 $webappName = "fabmedical-web-" + $studentprefix
 $planName = "fabmedical-plan-" + $studentprefix
@@ -7,32 +13,45 @@ $location1 = "westeurope"
 #$location2 = "northeurope"
 
 #Create Resource Group
-az group create --location $location1 --name $resourcegroupName | ConvertFrom-Json
+$rg = az group create --location $location1 --name $resourcegroupName | ConvertFrom-Json
 
 # Create CosmosDB
-az cosmosdb create --name $cosmosDBName `
---resource-group $resourcegroupName --kind MongoDB `
---locations regionName=$location1 failoverPriority=0 isZoneRedundant=False `
+az cosmosdb create --name $($cosmosDBName) `
+--resource-group $($resourcegroupName) --kind MongoDB `
+--locations regionName=$($location1) failoverPriority=0 isZoneRedundant=False `
 --enable-free-tier true --server-version 3.6 `
---capabilities "EnableServerless" --capabilities "EnableMongo" --capabilities "DisableRateLimitingResponses" `
-| ConvertFrom-Json
+--capabilities "EnableServerless" --capabilities "EnableMongo" --capabilities "DisableRateLimitingResponses"
 
 # Create Azure App Service Plan
-az appservice plan create --name $planName --resource-group $resourcegroupName --sku S1 --is-linux | ConvertFrom-Json
-
-az webapp create --resource-group marzulo_eu --plan $planName --name $webappName -i nginx | ConvertFrom-Json
-
-az cosmosdb keys list -n fabmedical-cdb-mzl -g $resourcegroupName --type connection-strings | ConvertFrom-Json
+az appservice plan create --name $($planName) --resource-group $($resourcegroupName) --sku S1 --is-linux
 
 # Create Azure Web App COMPOSE CONTAINERS
-az webapp create -g $resourcegroupName -p $planName -n $webappName `
---docker-registry-server-password $global:CTC_PAT `
---docker-registry-server-user swo-italia `
+az webapp create -g $($resourcegroupName) -p $($planName) -n $($webappName) `
 --multicontainer-config-file docker-compose.yml `
 --multicontainer-config-type COMPOSE 
 
+# Reconfigure Azure Web App GHCR credentials
+az webapp config appsettings set --settings DOCKER_REGISTRY_SERVER_USERNAME="swo-italia" `
+--name $($webappName) --resource-group $($resourcegroupName)
+
+az webapp config appsettings set --settings DOCKER_REGISTRY_SERVER_URL="https://ghcr.io" `
+--name $($webappName) --resource-group $($resourcegroupName)
+
+az webapp config appsettings set --settings DOCKER_REGISTRY_SERVER_PASSWORD="$($env.CTC_PAT)" `
+--name $($webappName) --resource-group $($resourcegroupName)
+
+az webapp config appsettings set --settings WEBSITES_WEBDEPLOY_USE_SCM="false" `
+--name $($webappName) --resource-group $($resourcegroupName)
+
+az webapp config appsettings set --settings WEBSITES_ENABLE_APP_SERVICE_STORAGE="false" `
+--name $($webappName) --resource-group $($resourcegroupName)
+
+az webapp config appsettings set --settings WEBSITES_PORT = 80 `
+--name $($webappName) --resource-group $($resourcegroupName)
+
+# Reconfigure Azure Web App as COMPOSE and inform .yml
 az webapp config container set `
---docker-registry-server-password $global:CTC_PAT `
+--docker-registry-server-password $($env:CTC_PAT) `
 --docker-registry-server-url https://ghcr.io `
 --docker-registry-server-user swo-italia `
 --multicontainer-config-file docker-compose.yml `
@@ -40,4 +59,18 @@ az webapp config container set `
 --name $webappName `
 --resource-group $resourcegroupName 
 
-az webapp config appsettings set -n $webappName -g $resourcegroupName --settings MONGODB_CONNECTION="mongodb://fabmedical-cdb-mzl:9O2Z1krWoI6PZGwaNszfTPrcjvGkhNhU1sWtqaraPP4WwJuQhQKCVI97oWnw0Y7MlyDzZg8QBGhcqGo3rFeJVw==@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@"
+# Reconfigure Azure Web App with DB Connection Information
+$cosmodbpkey = az cosmosdb keys list -n fabmedical-cdb-mzl -g $resourcegroupName --type keys --query primaryMasterKey
+
+az webapp config appsettings set -n $webappName -g $resourcegroupName `
+--settings MONGODB_CONNECTION="mongodb://fabmedical-cdb-mzl:$($cosmodbpkey)@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@"
+
+# Reconfigure MongoDB with current data
+Set-Location /workspaces/CodeToCloud-Source/content-init
+docker run -e MONGODB_CONNECTION="mongodb://fabmedical-cdb-mzl:$($cosmodbpkey)@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@" `
+ghcr.io/swo-italia/fabrikam-init
+
+Set-Location /workspaces/CodeToCloud-Source/infrastructure
+
+# Restart the APP to read the MONGODB
+az webapp restart -g $($resourcegroupName) -n $($webappName)

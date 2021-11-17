@@ -1,6 +1,7 @@
-#variable "resource_group_name" {
-#  default = "fabmedical-rg-mzl"
-#}
+variable "client_secret" {
+  type    = string
+  default = ""
+}
 
 variable "location_name" {
   default = "westeurope"
@@ -10,7 +11,7 @@ variable "location_name_redundant" {
   default = "northeurope"
 }
 
-variable "studentprefix" {
+variable "env_prefix" {
   default = "mzl"
 }
 
