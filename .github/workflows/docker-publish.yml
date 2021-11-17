@@ -1,0 +1,47 @@
+name: Docker Compose Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.CTC_PAT }}" | docker login https://ghcr.io -u swo-italia --password-stdin
+
+      - name: Build and Push image
+        run: |
+          docker-compose -f docker-compose.yml -f build.docker-compose.yml build
+          docker-compose -f docker-compose.yml -f build.docker-compose.yml push
+
+      - name: Login on Azure
+        uses: azure/login@v1.1
+        with:
+          creds: ${{ secrets.AZ_CRED }}
+
+      - name: Update WebApp with new Container version
+        ## TO DO: Create multiple environments using variables.TF
+        shell: pwsh
+        run:
+          cd .\update_docker_compose
+          /workspaces/terraform validate -env_prefix mzl
