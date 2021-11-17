@@ -44,6 +44,5 @@ jobs:
         shell: pwsh
         env:
            CR_PAT: ${{ secrets.CTC_PAT }}
-        run: |
-           Set-Location /workspaces/CodeToCloud-Source/infrastructure
+        run:
            ./infrastructure/deploy-infrastrcuture_mzl.ps1 -studentprefix mzl
