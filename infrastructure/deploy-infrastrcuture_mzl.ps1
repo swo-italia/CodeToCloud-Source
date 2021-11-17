@@ -66,11 +66,11 @@ az webapp config appsettings set -n $webappName -g $resourcegroupName `
 --settings MONGODB_CONNECTION="mongodb://fabmedical-cdb-mzl:$($cosmodbpkey)@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@"
 
 # Reconfigure MongoDB with current data
-Set-Location /workspaces/CodeToCloud-Source/content-init
+Set-Location ./content-init
 docker run -e MONGODB_CONNECTION="mongodb://fabmedical-cdb-mzl:$($cosmodbpkey)@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@" `
 ghcr.io/swo-italia/fabrikam-init
 
-Set-Location /workspaces/CodeToCloud-Source/infrastructure
+Set-Location ../infrastructure
 
 # Restart the APP to read the MONGODB
 az webapp restart -g $($resourcegroupName) -n $($webappName)
