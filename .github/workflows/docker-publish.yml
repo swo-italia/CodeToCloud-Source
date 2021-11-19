@@ -9,10 +9,12 @@ on:
   pull_request:
 
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ghcr.io/swo-italia
+  CR_PAT: ${{ secrets.CTC_PAT }}
+  CTC_PAT: ${{ secrets.CTC_PAT }}
+  TF_VAR_ctc_pat: ${{ secrets.CTC_PAT }}
+  TF_VAR_client_secret: ${{ secrets.CTC_AZSEC }}
 
 jobs:
   build:
@@ -34,15 +36,42 @@ jobs:
           docker-compose -f docker-compose.yml -f build.docker-compose.yml build
           docker-compose -f docker-compose.yml -f build.docker-compose.yml push
 
-      - name: Login on Azure
-        uses: azure/login@v1.1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      #- name: Login on Azure if use .ps1 script
+      #  uses: azure/login@v1.1
+      #  with:
+      #    creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Update WebApp with new Container version
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+            cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        id: fmt
+        working-directory: ./infrastructure/
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        working-directory: ./infrastructure/
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        working-directory: ./infrastructure/
+        run: terraform validate -no-color
+
+      - name: Update WebApp with new Container version using Terraform
         ## TO DO: Create multiple environments using variables.TF
-        shell: pwsh
-        env:
-           CR_PAT: ${{ secrets.CTC_PAT }}
-        run:
-           ./infrastructure/deploy-infrastrcuture_mzl.ps1 -studentprefix mzl
+        ##shell: pwsh
+        ##env:
+        ##   CR_PAT: ${{ secrets.CTC_PAT }}
+        ##   CTC_PAT: ${{ secrets.CTC_PAT }}
+        ##   TF_VAR_ctc_pat: ${{ secrets.CTC_PAT }}
+        ##   TF_VAR_client_secret: ${{ secrets.CTC_AZSEC }}
+        ##run:
+        ##   ./infrastructure/deploy-infrastrcuture_mzl.ps1 -studentprefix mzl
+        id: apply
+        working-directory: ./infrastructure/
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve
