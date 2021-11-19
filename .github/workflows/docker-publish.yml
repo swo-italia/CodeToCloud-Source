@@ -72,6 +72,11 @@ jobs:
         ##run:
         ##   ./infrastructure/deploy-infrastrcuture_mzl.ps1 -studentprefix mzl
         id: apply
+        env:
+           CR_PAT: ${{ secrets.CTC_PAT }}
+           CTC_PAT: ${{ secrets.CTC_PAT }}
+           TF_VAR_ctc_pat: ${{ secrets.CTC_PAT }}
+           TF_VAR_client_secret: ${{ secrets.CTC_AZSEC }}
         working-directory: ./infrastructure/
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
