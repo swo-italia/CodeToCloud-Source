@@ -1,5 +1,14 @@
 # Configure the Azure provider
 terraform {
+  backend "remote" {
+    hostname     = "app.terraform.io"
+    organization = "swo-italia"
+
+    workspaces {
+      name = "CodeToCloud-Source"
+    }
+  }
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -91,9 +100,9 @@ resource "azurerm_cosmosdb_account" "db" {
   }
 
   provisioner "local-exec" {
-    interpreter = ["pwsh", "-Command"]
+    interpreter = ["/bin/bash", "-c"]
     command     = "docker run -e MONGODB_CONNECTION=\"mongodb://fabmedical-cdb-mzl:${azurerm_cosmosdb_account.db.primary_key}@fabmedical-cdb-mzl.mongo.cosmos.azure.com:10255/contentdb?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@fabmedical-cdb-mzl@\" ghcr.io/swo-italia/fabrikam-init"
-    working_dir = "/workspaces/CodeToCloud-Source/content-init"
+    working_dir = "../content-init"
   }
 }
 

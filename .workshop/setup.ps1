@@ -152,6 +152,7 @@ function Apply-Settings
     $global:CTC_PAT = $current.CTC_PAT
     $global:TF_VAR_ctc_pat = $current.CTC_PAT
     $global:TF_VAR_client_secret = $current.CTC_AZSEC
+    $global:TF_VAR_tfclient_secret = $current.TFC_SEC
     
     $env:studentsuffix = $current.Student
     $env:resourcegroupName = "fabmedical-rg-" + $current.Student
@@ -165,6 +166,7 @@ function Apply-Settings
     $env:CTC_PAT = $current.CTC_PAT
     $env:TF_VAR_ctc_pat = $current.CTC_PAT
     $env:TF_VAR_client_secret = $current.CTC_AZSEC
+    $env:TF_VAR_tfclient_secret = $current.TFC_SEC
   }
 }
 

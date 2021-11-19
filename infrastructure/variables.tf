@@ -3,6 +3,11 @@ variable "client_secret" {
   default = ""
 }
 
+variable "tfclient_secret" {
+  type    = string
+  default = ""
+}
+
 variable "location_name" {
   default = "westeurope"
 }
