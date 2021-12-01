@@ -27,6 +27,7 @@ steps:
     dockerRegistryEndpoint: 'Github Container Registry'
     dockerComposeFile: 'docker-compose.yml'
     additionalDockerComposeFiles: 'build.docker-compose.yml'
-    action: 'Run a Docker Compose command'
-    dockerComposeCommand: 'docker-compose -f docker-compose.yml -f build.docker-compose.yml push'
+    action: 'Push services'
+    additionalImageTags: '$(Build.BuildNumber)'
+    includeLatestTag: true
     
