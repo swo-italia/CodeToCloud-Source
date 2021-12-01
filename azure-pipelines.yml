@@ -20,12 +20,13 @@ steps:
     action: 'Build services'
     additionalImageTags: '$(Build.BuildNumber)'
 
+- checkout: self
 - task: DockerCompose@0
   inputs:
     containerregistrytype: 'Container Registry'
     dockerRegistryEndpoint: 'Github Container Registry'
     dockerComposeFile: 'docker-compose.yml'
     additionalDockerComposeFiles: 'build.docker-compose.yml'
-    action: 'Push services'
-    additionalImageTags: '$(Build.BuildNumber)'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'docker-compose -f docker-compose.yml -f build.docker-compose.yml push'
     
