@@ -24,10 +24,9 @@ steps:
 - task: DockerCompose@0
   inputs:
     containerregistrytype: 'Container Registry'
-    dockerRegistryEndpoint: 'Github Container Registry'
+    dockerRegistryEndpoint: 'GHCR.IO'
     dockerComposeFile: 'docker-compose.yml'
     additionalDockerComposeFiles: 'build.docker-compose.yml'
     action: 'Push services'
     additionalImageTags: '$(Build.BuildNumber)'
-    includeLatestTag: true
     
