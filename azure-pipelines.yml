@@ -20,7 +20,6 @@ steps:
     action: 'Build services'
     additionalImageTags: '$(Build.BuildNumber)'
 
-- checkout: self
 - task: DockerCompose@0
   inputs:
     containerregistrytype: 'Container Registry'
