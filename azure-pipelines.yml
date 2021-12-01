@@ -9,23 +9,50 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- checkout: self
-- task: DockerCompose@0
-  inputs:
-    containerregistrytype: 'Container Registry'
-    dockerRegistryEndpoint: 'Github Container Registry'
-    dockerComposeFile: 'docker-compose.yml'
-    additionalDockerComposeFiles: 'build.docker-compose.yml'
-    action: 'Build services'
-    additionalImageTags: '$(Build.BuildNumber)'
+stages:
+  - stage: build
+    jobs:
+    - job: 'BuildAndPublish'
+      displayName: 'Build and Publish'
+      steps:
+      - checkout: self
+      - task: DockerCompose@0
+        inputs:
+          containerregistrytype: 'Container Registry'
+          dockerRegistryEndpoint: 'Github Container Registry'
+          dockerComposeFile: 'docker-compose.yml'
+          additionalDockerComposeFiles: 'build.docker-compose.yml'
+          action: 'Build services'
+          additionalImageTags: '$(Build.BuildNumber)'
 
-- task: DockerCompose@0
-  inputs:
-    containerregistrytype: 'Container Registry'
-    dockerRegistryEndpoint: 'GHCR.IO'
-    dockerComposeFile: 'docker-compose.yml'
-    additionalDockerComposeFiles: 'build.docker-compose.yml'
-    action: 'Push services'
-    additionalImageTags: '$(Build.BuildNumber)'
-    
+      - task: DockerCompose@0
+        inputs:
+          containerregistrytype: 'Container Registry'
+          dockerRegistryEndpoint: 'GHCR.IO'
+          dockerComposeFile: 'docker-compose.yml'
+          additionalDockerComposeFiles: 'build.docker-compose.yml'
+          action: 'Push services'
+          additionalImageTags: '$(Build.BuildNumber)'
+  - stage: DeployProd
+    dependsOn: build
+    jobs:
+    - deployment: infrastructure
+      environment: production
+      strategy:
+       runOnce:
+         deploy:
+          steps:
+            - checkout: self
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: "Azure"
+                scriptType: 'pscore'
+                scriptLocation: 'scriptPath'
+                scriptPath: './infrastructure/deploy-infrastrcuture_mzl.ps1'
+                arguments: 'mzl'
+              env:
+                CR_PAT: $(CR_PAT)
+                CTC_PAT: $(CTC_PAT)
+                TF_VAR_ctc_pat: $(CTC_PAT)
+                TF_VAR_client_secret: $(CTC_AZSEC)
+                TF_VAR_tfclient_secret: $(TFC_SEC)
