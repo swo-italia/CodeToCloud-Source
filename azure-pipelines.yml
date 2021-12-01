@@ -45,7 +45,7 @@ stages:
             - checkout: self
             - task: AzureCLI@2
               inputs:
-                azureSubscription: "Azure"
+                azureSubscription: "AzureRMConn"
                 scriptType: 'pscore'
                 scriptLocation: 'scriptPath'
                 scriptPath: './infrastructure/deploy-infrastrcuture_mzl.ps1'
