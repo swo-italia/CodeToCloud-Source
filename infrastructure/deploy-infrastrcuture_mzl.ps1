@@ -25,6 +25,10 @@ az cosmosdb create --name $($cosmosDBName) `
 # Create Azure App Service Plan
 az appservice plan create --name $($planName) --resource-group $($resourcegroupName) --sku S1 --is-linux
 
+### TO-DO 
+#az extension remove -n appservice-kube
+#az extension add --yes --source "https://aka.ms/appsvc/appservice_kube-latest-py2.py3-none-any.whl"
+
 # Create Azure Web App COMPOSE CONTAINERS
 az webapp create -g $($resourcegroupName) -p $($planName) -n $($webappName) `
 --multicontainer-config-file docker-compose.yml `
